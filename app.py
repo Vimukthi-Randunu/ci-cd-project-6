@@ -20,6 +20,10 @@ class User(db.Model):
     name = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), nullable=False)
 
+if os.environ.get('TESTING') != 'true':
+    with app.app_context():
+        db.create_all()
+
 # THEN create tables — now SQLAlchemy knows about User
 with app.app_context():
     db.create_all()

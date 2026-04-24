@@ -7,6 +7,7 @@ os.environ['DB_USER'] = 'test_user'
 os.environ['DB_PASSWORD'] = 'test_password'
 os.environ['DB_HOST'] = 'localhost'
 os.environ['DB_NAME'] = 'test_db'
+os.environ['TESTING'] = 'true'
 
 from app import app
 
