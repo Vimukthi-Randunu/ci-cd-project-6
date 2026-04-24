@@ -4,7 +4,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-# Build the database connection string from environment variables
 app.config['SQLALCHEMY_DATABASE_URI'] = (
     f"postgresql://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}"
     f"@{os.environ['DB_HOST']}:{os.environ.get('DB_PORT', '5432')}"
@@ -12,8 +11,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
 )
 
 db = SQLAlchemy(app)
-    
-# Define the User model — this maps to a table called 'users' in Postgres
+
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -24,10 +22,6 @@ if os.environ.get('TESTING') != 'true':
     with app.app_context():
         db.create_all()
 
-# THEN create tables — now SQLAlchemy knows about User
-with app.app_context():
-    db.create_all()
-
 @app.route('/')
 def health():
     return jsonify({'status': 'ok'})
@@ -36,8 +30,3 @@ def health():
 def get_users():
     users = User.query.all()
     return jsonify([{'id': u.id, 'name': u.name, 'email': u.email} for u in users])
-
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    app.run(host='0.0.0.0', port=5000)
