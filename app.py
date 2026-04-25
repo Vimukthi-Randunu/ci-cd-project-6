@@ -1,4 +1,5 @@
 import os
+import time
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
@@ -19,8 +20,18 @@ class User(db.Model):
     email = db.Column(db.String(120), nullable=False)
 
 if os.environ.get('TESTING') != 'true':
-    with app.app_context():
-        db.create_all()
+    retries = 5
+    while retries > 0:
+        try:
+            with app.app_context():
+                db.create_all()
+            break
+        except Exception as e:
+            retries -= 1
+            print(f"Database not ready, retrying... ({retries} left)")
+            time.sleep(3)
+    if retries == 0:
+        raise Exception("Could not connect to database after multiple retries")
 
 @app.route('/')
 def health():
