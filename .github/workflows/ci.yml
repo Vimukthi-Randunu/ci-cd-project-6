@@ -62,6 +62,7 @@ jobs:
             cd ~/ci-cd-project-5
             git pull origin main
             docker-compose pull
+            docker-compose down
             docker-compose up -d
             sleep 15
             curl -f http://localhost:5000 || exit 1
