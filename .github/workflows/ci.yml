@@ -63,5 +63,5 @@ jobs:
             git pull origin main
             docker-compose pull
             docker-compose up -d
-            sleep 5
+            sleep 15
             curl -f http://localhost:5000 || exit 1
