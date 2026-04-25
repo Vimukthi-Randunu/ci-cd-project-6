@@ -65,4 +65,4 @@ jobs:
             docker-compose down
             docker-compose up -d
             sleep 15
-            curl -f http://localhost:5000 || exit 1
+            curl -f http://localhost:5001 || exit 1
