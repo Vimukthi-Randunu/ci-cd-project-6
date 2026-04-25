@@ -23,15 +23,15 @@ def test_health_check(client):
     assert response.json == {'status': 'ok'}
 
 def test_get_users(client):
-    # Create a fake user object
     mock_user = MagicMock()
     mock_user.id = 1
     mock_user.name = 'Test User'
     mock_user.email = 'test@example.com'
 
-    with patch('app.User.query') as mock_query:
-        mock_query.all.return_value = [mock_user]
-        response = client.get('/users')
+    with app.app_context():
+        with patch('app.User.query') as mock_query:
+            mock_query.all.return_value = [mock_user]
+            response = client.get('/users')
 
     assert response.status_code == 200
     data = response.json
