@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
@@ -9,7 +9,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
     services:
       db:
         image: postgres:15
@@ -24,18 +23,14 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-
       - name: Install dependencies
         run: pip install -r requirements.txt
-
       - name: Run tests
         env:
           DB_USER: ${{ secrets.POSTGRES_USER }}
@@ -44,25 +39,68 @@ jobs:
           DB_NAME: ${{ secrets.POSTGRES_DB }}
         run: pytest tests/
 
-  deploy:
+  build-and-push:
     runs-on: ubuntu-latest
     needs: test
     if: github.ref == 'refs/heads/main'
-
+    outputs:
+      image_tag: ${{ steps.set_tag.outputs.image_tag }}
     steps:
       - uses: actions/checkout@v4
+      - name: Set image tag
+        id: set_tag
+        run: echo "image_tag=${{ github.sha }}" >> $GITHUB_OUTPUT
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: vimukthirandunu/ci-cd-project-6:${{ github.sha }}
 
-      - name: Deploy to EC2
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    environment: staging
+    steps:
+      - name: Deploy to staging
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd ~/ci-cd-project-5
+            cd ~/ci-cd-project-6
             git pull origin main
-            docker-compose pull
-            docker-compose down
-            docker-compose up -d
+            IMAGE_TAG=${{ needs.build-and-push.outputs.image_tag }} \
+            POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
+            POSTGRES_DB=${{ secrets.POSTGRES_DB }} \
+            docker compose up -d
+            sleep 15
+            curl -f http://localhost:5001 || exit 1
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    environment: production
+    steps:
+      - name: Deploy to production
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/ci-cd-project-6
+            git pull origin main
+            IMAGE_TAG=${{ needs.build-and-push.outputs.image_tag }} \
+            POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
+            POSTGRES_DB=${{ secrets.POSTGRES_DB }} \
+            docker compose up -d
             sleep 15
             curl -f http://localhost:5001 || exit 1
