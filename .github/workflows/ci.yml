@@ -75,10 +75,10 @@ jobs:
           script: |
             cd ~/ci-cd-project-6
             git pull origin main
-            IMAGE_TAG=${{ needs.build-and-push.outputs.image_tag }} \
-            POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
-            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
-            POSTGRES_DB=${{ secrets.POSTGRES_DB }} \
+            export IMAGE_TAG=${{ needs.build-and-push.outputs.image_tag }}
+            export POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+            export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            export POSTGRES_DB=${{ secrets.POSTGRES_DB }}
             docker compose up -d
             sleep 15
             curl -f http://localhost:5001 || exit 1
@@ -97,10 +97,10 @@ jobs:
           script: |
             cd ~/ci-cd-project-6
             git pull origin main
-            IMAGE_TAG=${{ needs.build-and-push.outputs.image_tag }} \
-            POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
-            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
-            POSTGRES_DB=${{ secrets.POSTGRES_DB }} \
+            export IMAGE_TAG=${{ needs.build-and-push.outputs.image_tag }}
+            export POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+            export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            export POSTGRES_DB=${{ secrets.POSTGRES_DB }}
             docker compose up -d
             sleep 15
             curl -f http://localhost:5001 || exit 1
