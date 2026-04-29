@@ -79,7 +79,7 @@ jobs:
             export POSTGRES_USER=${{ secrets.POSTGRES_USER }}
             export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
             export POSTGRES_DB=${{ secrets.POSTGRES_DB }}
-            docker compose up -d
+            docker-compose up -d
             sleep 15
             curl -f http://localhost:5001 || exit 1
 
@@ -101,6 +101,6 @@ jobs:
             export POSTGRES_USER=${{ secrets.POSTGRES_USER }}
             export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
             export POSTGRES_DB=${{ secrets.POSTGRES_DB }}
-            docker compose up -d
+            docker-compose up -d
             sleep 15
             curl -f http://localhost:5001 || exit 1
