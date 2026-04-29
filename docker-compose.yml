@@ -10,7 +10,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   flask:
-    build: .
+    image: vimukthirandunu/ci-cd-project-6:${IMAGE_TAG}
     ports:
       - "5001:5000"
     environment:
